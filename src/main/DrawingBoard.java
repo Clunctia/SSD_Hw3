@@ -26,6 +26,9 @@ public class DrawingBoard extends JPanel {
 
 	public void addGObject(GObject gObject) {
 		// TODO: Implement this method.
+		for(GObject go : gObjects){
+			go.deselected();
+		}
 		gObjects.add(gObject);
 		repaint();
 	}
