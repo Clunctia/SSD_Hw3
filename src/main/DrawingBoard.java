@@ -33,8 +33,8 @@ public class DrawingBoard extends JPanel {
 	public void groupAll() {
 		// TODO: Implement this method.
 		CompositeGObject group = new CompositeGObject();
-		for(GObject gObject : gObjects){
-			group.add(gObject);
+		for(GObject go : gObjects){
+			group.add(go);
 		}
 		group.recalculateRegion();
 		clear();
@@ -45,12 +45,11 @@ public class DrawingBoard extends JPanel {
 
 	public void deleteSelected() {
 		// TODO: Implement this method.
-		if(target != null){
-			gObjects.remove(target);
-			repaint();
+		for (GObject go : target) {
+			gObjects.remove(go);
 		}
 		repaint();
-		
+
 	}
 
 	public void clear() {
@@ -96,7 +95,7 @@ public class DrawingBoard extends JPanel {
 		// TODO: You need some variables here
 		int eX, eY;
 		boolean object = false, drag = false, move = false;
-		
+
 		private void deselectAll() {
 			// TODO: Implement this 
 			for(GObject go : gObjects){
@@ -136,10 +135,11 @@ public class DrawingBoard extends JPanel {
 		public void mouseDragged(MouseEvent e) {
 			// TODO: Implement this method.
 			drag = true;
+			int x,y;
 			if(object){
 				move = true;
-				int x = e.getX();
-				int y = e.getY();
+				x = e.getX();
+				y = e.getY();
 				for(GObject go : target){
 					go.move(x-eX, y-eY);
 				}
@@ -148,14 +148,14 @@ public class DrawingBoard extends JPanel {
 				repaint();
 			} else {
 				move = false;
-				int x = e.getX();
-				int y = e.getY();
+				x = e.getX();
+				y = e.getY();
 				repaint();
 				Graphics g = getGraphics();
 				g.setColor(Color.MAGENTA);
 				Graphics2D g2D = (Graphics2D) g;
-				g2D.setStroke(new BasicStroke(2));
-				
+				g2D.setStroke(new BasicStroke(5));
+
 				if(eX <= x && eY <= y)
 					g2D.drawRect(eX,eY,x-eX,y-eY);
 				else if(eX > x && eY <= y)
@@ -164,17 +164,18 @@ public class DrawingBoard extends JPanel {
 					g2D.drawRect(eX, y, x-eX,eY-y);
 				else
 					g2D.drawRect(x, y, eX-x, eY-y);
-				
+
 			}
 		}
-		
+
 		@Override
 		public void mouseReleased(MouseEvent e){
+			int x, y;
 			if(drag &&!move){
 				deselectAll();
 				target.clear();
-				int x = e.getX();
-				int y = e.getY();
+				x = e.getX();
+				y = e.getY();
 				for(GObject go : gObjects){
 					if(go.covered(eX, eY, x, y)){
 						target.add(go);
