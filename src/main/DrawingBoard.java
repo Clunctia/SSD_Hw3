@@ -11,13 +11,14 @@ public class DrawingBoard extends JPanel {
 
 	private MouseAdapter mouseAdapter; 
 	private List<GObject> gObjects;
-	private GObject target;
+	private List<GObject> target;
 
 	private int gridSize = 10;
 
 	public DrawingBoard() {
 		gObjects = new ArrayList<GObject>();
 		mouseAdapter = new MAdapter();
+		target = new ArrayList<GObject>();
 		addMouseListener(mouseAdapter);
 		addMouseMotionListener(mouseAdapter);
 		setPreferredSize(new Dimension(800, 600));
@@ -48,13 +49,14 @@ public class DrawingBoard extends JPanel {
 			gObjects.remove(target);
 			repaint();
 		}
+		repaint();
 		
 	}
 
 	public void clear() {
 		// TODO: Implement this method.
 		gObjects.clear();
-		target = null;
+		target.clear();
 		repaint();
 	}
 
@@ -93,13 +95,14 @@ public class DrawingBoard extends JPanel {
 
 		// TODO: You need some variables here
 		int eX, eY;
+		boolean object = false, drag = false, move = false;
 		
 		private void deselectAll() {
 			// TODO: Implement this 
 			for(GObject go : gObjects){
 				go.deselected();
 			}
-			target = null;
+			target.clear();
 			repaint();
 		}
 
@@ -108,27 +111,76 @@ public class DrawingBoard extends JPanel {
 			// TODO: Implement this method.
 			eX = e.getX();
 			eY = e.getY();
-			deselectAll();
-			target = null;
+			object = false;
 			for(GObject go : gObjects){
 				if(go.pointerHit(eX, eY)){
-					go.selected();
-					target = go;
-					repaint();
+					object = true;
+					if(!target.contains(go)){
+						deselectAll();
+						target.clear();
+						go.selected();
+						target.add(go);
+						repaint();
+					}
 					break;
 				}
+			}
+			if(!object){
+				deselectAll();
+				target.clear();
+				repaint();
 			}
 		}
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
 			// TODO: Implement this method.
-			if(target != null){
+			drag = true;
+			if(object){
+				move = true;
 				int x = e.getX();
 				int y = e.getY();
-				target.move(x - eX, y - eY);
+				for(GObject go : target){
+					go.move(x-eX, y-eY);
+				}
 				eX = x;
 				eY = y;
+				repaint();
+			} else {
+				move = false;
+				int x = e.getX();
+				int y = e.getY();
+				repaint();
+				Graphics g = getGraphics();
+				g.setColor(Color.MAGENTA);
+				Graphics2D g2D = (Graphics2D) g;
+				g2D.setStroke(new BasicStroke(2));
+				
+				if(eX <= x && eY <= y)
+					g2D.drawRect(eX,eY,x-eX,y-eY);
+				else if(eX > x && eY <= y)
+					g2D.drawRect(x, eY, eX-x, y-eY);
+				else if(eX > x && eY <= y)
+					g2D.drawRect(eX, y, x-eX,eY-y);
+				else
+					g2D.drawRect(x, y, eX-x, eY-y);
+				
+			}
+		}
+		
+		@Override
+		public void mouseReleased(MouseEvent e){
+			if(drag &&!move){
+				deselectAll();
+				target.clear();
+				int x = e.getX();
+				int y = e.getY();
+				for(GObject go : gObjects){
+					if(go.covered(eX, eY, x, y)){
+						target.add(go);
+						go.selected();
+					}
+				}
 				repaint();
 			}
 		}

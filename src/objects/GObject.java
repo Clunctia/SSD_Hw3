@@ -65,6 +65,23 @@ public abstract class GObject {
 		g2d.setStroke(new BasicStroke(size));
 		g2d.drawRect(x, y, width, height);
 	}
+	
+	public boolean covered(int x1, int y1, int x2, int y2) {
+		if (x1 > x2) {
+			int tmp = x2;
+			x2 = x1;
+			x1 = tmp;
+		}
+		if (y1 > y2) {
+			int tmp = y2;
+			y2 = y1;
+			y1 = tmp;
+		}
+			
+		if (x >= x1 && x + width <= x2 && y >= y1 && y + height <= y2)
+			return true;
+		return false;
+	}
 
 	public abstract void paintObject(Graphics g);
 
